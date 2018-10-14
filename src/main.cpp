@@ -8,7 +8,9 @@
 namespace TTF = SDL::TTF;
 namespace IMG = SDL::IMG;
 
+extern "C"
 int main( int argc, char* argv[] )
+try
 {
 	bool running = true;
 	std::cout << "Hello, World!" << std::endl;
@@ -121,4 +123,24 @@ int main( int argc, char* argv[] )
 	// Clean up
 	//SDL_Quit();
 	return 0;
+}
+catch( SDL::Exception e )
+{
+	char cCurrentPath[FILENAME_MAX];
+	_getcwd(cCurrentPath, sizeof(cCurrentPath));
+	std::cout << "Current working directory: " << cCurrentPath << std::endl;
+
+	std::cout
+		<< "Aborting program: " << e.Text()
+		<< " error code: " << e.Code() << std::endl;
+
+	// put a breakpoint in this line, to prevent the shell from closing
+	return e.Code();
+}
+catch( ... )
+{
+	std::cout << "Non-SDL Exception has occured!" << std::endl;
+	// 
+	// put a breakpoint in this line, to prevent the shell from closing
+	return -999;
 }
