@@ -126,10 +126,6 @@ try
 }
 catch( SDL::Exception e )
 {
-	char cCurrentPath[FILENAME_MAX];
-	_getcwd(cCurrentPath, sizeof(cCurrentPath));
-	std::cout << "Current working directory: " << cCurrentPath << std::endl;
-
 	std::cout
 		<< "Aborting program: " << e.Text()
 		<< " error code: " << e.Code() << std::endl;
