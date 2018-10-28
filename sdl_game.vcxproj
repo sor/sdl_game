@@ -147,7 +147,15 @@
     <Font Include="assets\fonts\RobotoSlab-Bold.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\graphics\background.png" />
     <Image Include="assets\graphics\streets.png" />
+    <Image Include="assets\graphics\ui.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\gamebase.h" />
+    <ClInclude Include="src\global.h" />
+    <ClInclude Include="src\intro.h" />
+    <ClInclude Include="src\editor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
