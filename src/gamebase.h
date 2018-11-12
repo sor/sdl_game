@@ -85,6 +85,8 @@ public:
 				? SDL::Renderer::Flags::PRESENTVSYNC
 				: SDL::Renderer::Flags::NONE)
 		);
+
+		std::fill( allStates.begin(), allStates.end(), nullptr );
 	}
 
 	virtual bool HandleEvent(const Event evt)
@@ -161,9 +163,9 @@ protected:
 		if (	nextStateIdx != currentStateIdx 
 			&&	nextStateIdx != -1)
 		{
+			// Load the state or die (for now just die)
 			if (allStates[nextStateIdx] == nullptr)
 			{
-				// Load the state or die (for now just die)
 				isRunning = false;
 			}
 			else

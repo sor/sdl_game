@@ -1,6 +1,5 @@
 #include <iostream>
 #include <stdio.h>
-#include <sstream>
 
 #include "global.h"
 
@@ -12,11 +11,18 @@ class MyGame : public Game
 {
 public:
 	MyGame()
-		: Game(Rect(1024,768), false)
+		: Game( Rect( 1024, 768 ), false )
 	{
-		allStates[0] = new IntroState(*this, renderer);
-		allStates[1] = new EditorState(*this, renderer);
-		SetNextState(0);
+		allStates[0] = new IntroState( *this, renderer );
+		allStates[1] = new EditorState( *this, renderer );
+		SetNextState( 0 );
+	}
+
+	virtual ~MyGame()
+	{
+		for( auto state : allStates )
+			if( state != nullptr )
+				delete state;
 	}
 };
 

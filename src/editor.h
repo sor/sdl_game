@@ -26,15 +26,23 @@ public:
 
 	virtual void Init() override
 	{
-		font = TTF::Font("../assets/fonts/RobotoSlab-Bold.ttf", 16);
-		tileSet = IMG::LoadTexture(renderer, "../assets/graphics/streets.png");
+		if( !font )
+			font = TTF::Font( "../assets/fonts/RobotoSlab-Bold.ttf", 16 );
 
-		for (auto& row : level)
+		if( !tileSet )
+			tileSet = IMG::LoadTexture( renderer, "../assets/graphics/streets.png" );
+
+		for( auto& row : level )
 		{
-			row.fill(Point(8, 8));
+			row.fill( Point( 8, 8 ) );
 		}
 
-		camera = Point(0, 0);
+		camera = Point( 0, 0 );
+	}
+
+	virtual void Uninit() override
+	{
+		// for example, do not unload, just keep it loaded
 	}
 
 	virtual void Events(const int frame, const float deltaT) override
