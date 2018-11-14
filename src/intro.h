@@ -42,10 +42,10 @@ public:
 			{
 				auto        kd = evt.Keyboard();
 				SDL::Keysym what_key = kd.keysym;
-				if (what_key.scancode() != SDL::Scancode::ESCAPE)
-				{
-					game.SetNextState(1); // continue to game on everything else than ESC
-				}
+				if (what_key.scancode() == SDL::Scancode::F9)
+					game.SetNextState(1); // continue to editor on F9
+				else if (what_key.scancode() != SDL::Scancode::ESCAPE)
+					game.SetNextState(2); // continue to game on everything else than ESC
 				break;
 			}
 			case Event::Type::MOUSEBUTTONDOWN:

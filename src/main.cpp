@@ -6,15 +6,17 @@
 #include "gamebase.h"
 #include "intro.h"
 #include "editor.h"
+#include "play.h"
 
 class MyGame : public Game
 {
 public:
 	MyGame()
-		: Game( Rect( 1024, 768 ), false )
+		: Game( Rect( 1024, 720 ), false )
 	{
 		allStates[0] = new IntroState( *this, renderer );
 		allStates[1] = new EditorState( *this, renderer );
+		allStates[2] = new PlayState( *this, renderer );
 		SetNextState( 0 );
 	}
 

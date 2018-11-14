@@ -1,6 +1,6 @@
 #pragma once
-#ifndef PLAY_H
-#define PLAY_H
+#ifndef EDITOR_H
+#define EDITOR_H
 
 #include "global.h"
 #include "gamebase.h"

@@ -151,6 +151,10 @@ public:
 				SDL::Delay(std::max(Duration::zero(), 16ms - deltaTNeeded));
 				deltaT = Clock::now() - start;
 			}
+			else
+			{
+				deltaT = deltaTNeeded;
+			}
 
 			++frame;
 		}
