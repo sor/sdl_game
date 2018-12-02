@@ -60,5 +60,8 @@
     <ClInclude Include="src\editor.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\play.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
