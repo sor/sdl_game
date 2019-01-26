@@ -9,16 +9,15 @@ class PlayState : public GameState
 {
 	const int TILESIZE = 32;
 
+	// ctor
 	using GameState::GameState;
 
-	//
-	// virtual bool IsFPSLimited() const override { return false; }
+	//virtual bool IsFPSLimited() const override { return false; }
 
 	Font	font;
-	Texture	tileSet;
 	Texture	spriteSheet;
 
-	float a_x = 0.0f, a_y = 0.0f;
+	float v_x = 0.0f, v_y = 0.0f;
 	float p_x = 100.0f, p_y = 100.0f;
 
 	bool	isPainting = false;
@@ -41,7 +40,7 @@ class PlayState : public GameState
 		"x...........................x",
 		"x.................xxxxxxxxxxx",
 		"x.........xxxxx...x",
-		"x.........xxxxx...x",
+		"x.........x.x.x...x",
 		"x.........xxxxxxxxx",
 		"x.................x",
 		"x.................x",
@@ -58,9 +57,6 @@ public:
 	{
 		if( !font )
 			font = TTF::Font( "../assets/fonts/RobotoSlab-Bold.ttf", 16 );
-
-		if( !tileSet )
-			tileSet = IMG::LoadTexture( renderer, "../assets/graphics/streets.png" );
 
 		if( !spriteSheet )
 			spriteSheet = IMG::LoadTexture( renderer, "../assets/graphics/merc.png" );
@@ -152,47 +148,51 @@ public:
 	{
 		const SDL::Uint8* key_array = SDL::GetKeyboardState( nullptr );
 
-		if( key_array[SDL::Scancode::DOWN ] ) a_y += 2000.0f * deltaT;
-		if( key_array[SDL::Scancode::UP   ] ) a_y -= 2000.0f * deltaT;
-		if( key_array[SDL::Scancode::LEFT ] ) a_x -= 2000.0f * deltaT;
-		if( key_array[SDL::Scancode::RIGHT] ) a_x += 2000.0f * deltaT;
+		if( key_array[SDL::Scancode::DOWN ] ) v_y += 3000.0f * deltaT;
+		if( key_array[SDL::Scancode::UP   ] ) v_y -= 3000.0f * deltaT;
+		if( key_array[SDL::Scancode::LEFT ] ) v_x -= 2000.0f * deltaT;
+		if( key_array[SDL::Scancode::RIGHT] ) v_x += 2000.0f * deltaT;
 
 		if( isGravity )
 		{
-			a_y += 1000.0f * deltaT;
+			v_y += 2000.0f * deltaT;
 		}
 
 		if( isJumping )
 		{
-			a_y       = -800.0f;
+			v_y       = -1100.0f;
 			isJumping = false;
 		}
 
 		if( isDrag )
 		{
-			const float drag_factor = powf( 0.2, deltaT );
-			a_x *= drag_factor;
-			a_y *= drag_factor;
-			if( a_x > 0 )
-				a_x -= 100 * deltaT;
+			const float drag_factor = powf( 0.15, deltaT );
+			v_x *= drag_factor;
+			v_y *= drag_factor;
+			if( v_x > 0 )
+				v_x -= 200 * deltaT;
 			else
-				a_x += 100 * deltaT;
+				v_x += 200 * deltaT;
 		}
 
-		float dest_x = p_x + a_x * deltaT;
-		float dest_y = p_y + a_y * deltaT;
+		float dest_x = p_x + v_x * deltaT;
+		float dest_y = p_y + v_y * deltaT;
 		if( isCollision )
 		{
 			int i_x = dest_x / TILESIZE;
 			int i_y = dest_y / TILESIZE;
 
+			//int i_x = round(dest_x / TILESIZE);
+			//int i_y = round(dest_y / TILESIZE);
+
 			if( level[i_y][i_x] == 'x'
 			 || level[i_y][i_x + 1] == 'x'
 			 || level[i_y + 1][i_x] == 'x'
-			 || level[i_y + 1][i_x + 1] == 'x' )
+			 || level[i_y + 1][i_x + 1] == 'x'
+			 )
 			{
-				a_x = 0;
-				a_y = 0;
+				v_x = 0;
+				v_y = 0;
 			}
 			else
 			{
@@ -246,27 +246,52 @@ public:
 		// Player
 		renderer.FillRect(Rect(p_x + camera.x, p_y + camera.y, TILESIZE, TILESIZE));
 
-		// Merc
-		const int scale = 4;
 
-		for(int i = 0; i < 3; ++i)
-			for(int j = 0; j < 2; ++j)
-				spriteSheet.DrawSprite( Point(800,500) + Point(8*i, 8*j)*scale + Point(-4,24-8)*scale, Point(512/8,512/8), Point(3*blink+i+3,4+j), scale);
+		/////////////////// Now for something completely different
 
-		for(int i = 0; i < 3; ++i)
-			for(int j = 0; j < 4; ++j)
-				spriteSheet.DrawSprite( Point(800,500) + Point(8*i,8*j)*scale + Point(0,-8)*scale, Point(512/8,512/8), Point(3*blink+i,0+j), scale);
+		if(isGravity)
+		{
+			// Merc
+			const int   scale      = 4;
+			const int   tileSize   = 8;
+			const int   scaledTile = scale * tileSize;
+			const Point pos        = Point( 800, 500 );
+			const Point tileCount  = Point( 512 / tileSize, 512 / tileSize );
+			const Point feetPos    = pos + Point( -4, 24 - 8 ) * scale;
+			const Point bodyPos    = pos + Point( 0, -8 ) * scale;
 
-		renderer.DrawRect(Rect(800, 500, 16*scale, 32*scale));
+			spriteSheet.DrawSprite( feetPos,
+									tileCount,
+									Rect( 3 * blink + 3, 4, 3, 2 ),
+									scale );
 
-		renderer.SetDrawColor(frameColors[(blink+1)%4]);
-		renderer.FillRect(Rect(800, 500+32*scale, 16*scale, scale));
+			spriteSheet.DrawSprite( bodyPos,
+									tileCount,
+									Rect( 3 * blink, 0, 3, 4 ),
+									scale );
+
+			renderer.SetDrawColor( frameColors[blink] );
+			renderer.DrawRect( Rect( 800, 500, 16 * scale, 32 * scale ) );
+
+			renderer.SetDrawColor( frameColors[(blink + 1) % 4] );
+			renderer.FillRect( Rect( 800, 500 + 32 * scale, 16 * scale, scale ) );
+
+			// outlines of the sprite tiles
+			if( !isDrag )
+			{
+				renderer.SetDrawColor( frameColors[(blink + 2) % 4] );
+				renderer.DrawRect( Rect( feetPos.x, feetPos.y, scaledTile*3, scaledTile*2 ) );
+
+				renderer.SetDrawColor( frameColors[(blink + 3) % 4] );
+				renderer.DrawRect( Rect( bodyPos.x, bodyPos.y, scaledTile*3, scaledTile*4 ) );
+			}
+		}
 
 		// cheapo benchmarking
 		//for (uint x = 0; x < 100; ++x)
 		{
 			std::ostringstream oss;
-			const char* text = "Mapeditor:\n\nLinksklick: Oben links im Bild selektiert das zu zeichnende Tile.\nLinksklick: Im Rest des Bildschirms platziert die Tile (nur im roten Rahmen).\nRechte Maustaste halten: Karte läßt sich mit der Maus bewegen.\n\n";
+			const char* text = "Cheats:\n\nF1: Gravitiy.\nF2: Drag.\nF3: Collision.\n\n";
 			oss << text
 				<< deltaT * 1000.0f
 				<< "ms";
@@ -279,7 +304,7 @@ public:
 				t2.SetColorMod(Color(0, 0, 0));
 				//SDL::C::SDL_SetTextureBlendMode(t2, SDL::C::SDL_BLENDMODE_BLEND);
 				const Point p(360, 20);
-				for (const Point& pd : { Point(-1, -1), Point(1, -1), Point(-1, 1), Point(1, 1) })//, Point(0, 2), Point(2, 0), Point(0, -2), Point(-2, 0) })
+				for (const Point& pd : { Point(-1, -1), Point(1, -1), Point(-1, 1), Point(1, 1) })
 					t2.Draw(p + pd);
 				t2.SetColorMod(Color(255, 255, 255));
 				t2.Draw(p);

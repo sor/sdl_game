@@ -52,7 +52,7 @@ protected:
 public:
 	bool IsRunning() const { return isRunning; }
 
-	Game(SDL::Rect windowSize = SDL::Rect(1024, 768), bool vSync = true)
+	Game(SDL::Rect windowSize = SDL::Rect(1024, 720), bool vSync = true)
 	{
 		init.initialize(SDL::Init::Flags::EVERYTHING);
 		initTTF.initialize();

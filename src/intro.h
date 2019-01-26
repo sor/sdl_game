@@ -7,6 +7,7 @@
 
 class IntroState : public GameState
 {
+	// ctor
 	using GameState::GameState;
 
 	TTF::Font font;

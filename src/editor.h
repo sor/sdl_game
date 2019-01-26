@@ -9,6 +9,7 @@ class EditorState : public GameState
 {
 	const int TILESIZE = 32;
 
+	// ctor
 	using GameState::GameState;
 
 	Font    font;
@@ -193,23 +194,25 @@ public:
 		//for (uint x = 0; x < 100; ++x)
 		{
 			std::ostringstream oss;
-			const char* text = "Mapeditor:\n\nLinksklick: Oben links im Bild selektiert das zu zeichnende Tile.\nLinksklick: Im Rest des Bildschirms platziert die Tile (nur im roten Rahmen).\nRechte Maustaste halten: Karte läßt sich mit der Maus bewegen.\n\n";
+			const char* text = "Mapeditor:\n\nLinksklick: Oben links im Bild selektiert das zu zeichnende Tile.\n"
+							   "Linksklick: Im Rest des Bildschirms platziert die Tile (nur im roten Rahmen).\n"
+							   "Rechte Maustaste halten: Karte läßt sich mit der Maus bewegen.\n\n";
 			oss << text
 				<< deltaT * 1000.0f
 				<< "ms";
 			{
-				Color c(255, 255, 255);
+				Color   c( 255, 255, 255 );
 				//SDL::C::TTF_SetFontHinting(font, ((t & 0x600) >> 9));
 				//SDL::C::TTF_SetFontOutline(font, 1);
-				Surface surf = font.RenderUTF8_Blended_Wrapped(oss.str(), c, 640);
-				Texture t2(renderer, surf);
-				t2.SetColorMod(Color(0, 0, 0));
+				Surface surf = font.RenderUTF8_Blended_Wrapped( oss.str(), c, 640 );
+				Texture t2( renderer, surf );
+				t2.SetColorMod( Color( 0, 0, 0 ) );
 				//SDL::C::SDL_SetTextureBlendMode(t2, SDL::C::SDL_BLENDMODE_BLEND);
-				const Point p(360, 20);
-				for (const Point& pd : { Point(-1, -1), Point(1, -1), Point(-1, 1), Point(1, 1) })//, Point(0, 2), Point(2, 0), Point(0, -2), Point(-2, 0) })
-					t2.Draw(p + pd);
-				t2.SetColorMod(Color(255, 255, 255));
-				t2.Draw(p);
+				const Point p( 360, 20 );
+				for( const Point& pd : { Point( -1, -1 ), Point( 1, -1 ), Point( -1, 1 ), Point( 1, 1 ) } )
+					t2.Draw( p + pd );
+				t2.SetColorMod( Color( 255, 255, 255 ) );
+				t2.Draw( p );
 			}
 		}
 
