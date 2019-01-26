@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <sstream>
+#include <ostream>
 
 #include "global.h"
 
@@ -32,6 +33,17 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 class Game
 {
+public:
+	// All output msec per frame, see: http://renderingpipeline.com/2013/02/fps-vs-msecframe/
+	enum class PerformanceDrawMode
+	{
+		None,	// working ;)
+		Title,	// working, averaged and only updated every 250ms
+		OStream,// working, averaged and only updated every 1000ms
+		PrintF,	// NOT working
+		Graph,	// NOT working
+	};
+
 protected:
 	SDL::Init     init;
 	SDL::Window   window;
@@ -49,8 +61,14 @@ protected:
 	GameState*            currentState = nullptr;
 	Array<GameState*, 10> allStates;
 
+	PerformanceDrawMode perfDrawMode      = PerformanceDrawMode::Title;
+	int                 lastPerfInfoFrame = 0;
+	TimePoint           lastPerfInfoTime  = Clock::now();
+	Duration            accumulatedNeeded = Duration::zero();
+
 public:
 	bool IsRunning() const { return isRunning; }
+	void PerfDrawMode( PerformanceDrawMode mode ) noexcept { perfDrawMode = mode; }
 
 	Game(SDL::Rect windowSize = SDL::Rect(1024, 720), bool vSync = true)
 	{
@@ -124,7 +142,7 @@ public:
 	{
 		Duration deltaT = Duration::zero();
 		Duration deltaTNeeded = Duration::zero();
-		TimePoint start = Clock::now();
+		TimePoint start;
 
 		while (IsRunning())
 		{
@@ -135,9 +153,8 @@ public:
 			const float deltaTF = std::chrono::duration<float>(deltaT).count();
 			const float deltaTFNeeded = std::chrono::duration<float>(deltaTNeeded).count();
 			
-			std::ostringstream oss;
-			oss << (deltaTFNeeded * 1000.0f) << "ms";
-			SDL::C::SDL_SetWindowTitle(window, oss.str().c_str());
+			if( perfDrawMode != PerformanceDrawMode::None )
+				OutputPerformanceInfo( start, deltaTNeeded );
 
 			currentState->Events(frame, deltaTF);
 			currentState->Update(frame, deltaTF);
@@ -181,6 +198,54 @@ protected:
 				currentState = allStates[currentStateIdx];
 				currentState->Init();
 			}
+		}
+	}
+
+	float AverageMSecPerFrame() const
+	{
+		const int passedFrames = frame - lastPerfInfoFrame + 1;
+		return std::chrono::duration<float>(accumulatedNeeded / passedFrames).count() * 1000.0f;
+	}
+
+	void ResetPerformanceInfo( const TimePoint current )
+	{
+		lastPerfInfoFrame = frame;
+		lastPerfInfoTime  = current;
+		accumulatedNeeded = Duration::zero();
+	}
+
+	void OutputPerformanceInfo( const TimePoint current, const Duration needed )
+	{
+		using namespace std::chrono_literals;
+
+		accumulatedNeeded += needed;
+
+		const Duration passedTime = current - lastPerfInfoTime;
+
+		switch( perfDrawMode )
+		{
+		case PerformanceDrawMode::Title:
+			if( passedTime > 250ms )
+			{
+				std::ostringstream oss;
+				oss << AverageMSecPerFrame() << "ms";
+				window.SetTitle( oss.str() );
+				ResetPerformanceInfo( current );
+			}
+			break;
+
+		case PerformanceDrawMode::OStream:
+			if( passedTime > 1000ms )
+			{
+				std::cout << AverageMSecPerFrame() << "ms" << std::endl;
+				ResetPerformanceInfo( current );
+			}
+			break;
+
+		case PerformanceDrawMode::PrintF:
+		case PerformanceDrawMode::Graph:
+			THROW_SDL_EXCEPTION(-1, "PrintF & Graph are not supported at the moment");
+			break;
 		}
 	}
 };
